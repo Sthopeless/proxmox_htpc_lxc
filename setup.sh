@@ -54,10 +54,31 @@ EOF
 msg "Installing Docker..."
 sh <(curl -sSL https://get.docker.com) &>/dev/null
 
+# Creating Folders
+msg "Creating Docker and Media folders..."
+DOCKER_PORTAINER_PATH='/home/docker/portainer'
+DOCKER_JELLYFIN_PATH='/home/docker/jellyfin'
+DOCKER_VSCODE_PATH='/home/docker/vscode'
+DOCKER_SONARR_PATH='/home/docker/sonarr'
+DOCKER_RADARR_PATH='/home/docker/radarr'
+DOCKER_BAZARR_PATH='/home/docker/bazarr'
+DOCKER_QBITTORRENT_PATH='/home/docker/qbittorrent'
+MEDIA_TVSHOWS_PATH='/home/media/tvshows'
+MEDIA_MOVIES_PATH='/home/media/movies'
+MEDIA_DOWNLOADS_PATH='/home/downloads'
+mkdir -p $(dirname $DOCKER_PORTAINER_PATH)
+mkdir -p $(dirname $DOCKER_VSCODE_PATH)
+mkdir -p $(dirname $DOCKER_JELLYFIN_PATH)
+mkdir -p $(dirname $DOCKER_SONARR_PATH)
+mkdir -p $(dirname $DOCKER_RADARR_PATH)
+mkdir -p $(dirname $DOCKER_BAZARR_PATH)
+mkdir -p $(dirname $DOCKER_QBITTORRENT_PATH)
+mkdir -p $(dirname $MEDIA_TVSHOWS_PATH)
+mkdir -p $(dirname $MEDIA_MOVIES_PATH)
+mkdir -p $(dirname $MEDIA_DOWNLOADS_PATH)
+
 # Install Portainer
 msg "Installing Portainer..."
-mkdir -p /docker/{portainer,vscode,radarr,sonarr,bazarr,qbittorrent,jellyfin}
-# docker volume create portainer_data >/dev/null
 docker run -d \
   -p 8000:8000 \
   -p 9000:9000 \
@@ -65,7 +86,7 @@ docker run -d \
   --name=portainer \
   --restart=always \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /docker/portainer:/data \
+  -v /home/docker/portainer:/data \
   portainer/portainer-ce &>/dev/null
 
 # Install Watchtower
@@ -83,14 +104,13 @@ docker run -d \
   --name=vscode \
   -e TZ=Europe/Amsterdam \
   -p 8443:8443 \
-  -v /docker/vscode:/config \
-  -v /docker:/config/workspace/Server
+  -v /home/docker/vscode:/config \
+  -v /home/:/config/workspace/Server \
   --restart unless-stopped \
   ghcr.io/linuxserver/code-server &>/dev/null
 
 # Installing HTPC Containers
 msg "Installing Jellyfin..."
-mkdir -p /home/media/{tvshows,movies}
 docker run -d \
   --name=jellyfin \
   -e TZ=Europe/Amsterdam \
@@ -98,7 +118,7 @@ docker run -d \
   -p 8920:8920 \
   -p 7359:7359/udp \
   -p 1900:1900/udp \
-  -v /home/jellyfin:/config \
+  -v /home/docker/jellyfin:/config \
   -v /home/media/tvshows:/data/tvshows \
   -v /home/media/movies:/data/movies \
   --restart unless-stopped \
@@ -106,7 +126,6 @@ docker run -d \
 
 # Install qbittorrent
 msg "Installing qbittorrent..."
-mkdir -p /home/downloads
 docker run -d \
   --name=qbittorrent \
   -e TZ=Europe/Amsterdam \
@@ -114,7 +133,7 @@ docker run -d \
   -p 6881:6881 \
   -p 6881:6881/udp \
   -p 8080:8080 \
-  -v /docker/qbittorrent:/config \
+  -v /home/docker/qbittorrent:/config \
   -v /home/downloads:/downloads \
   --restart unless-stopped \
   ghcr.io/linuxserver/qbittorrent &>/dev/null
@@ -125,7 +144,7 @@ docker run -d \
   --name=sonarr \
   -e TZ=Europe/Amsterdam \
   -p 8989:8989 \
-  -v /docker/sonarr:/config \
+  -v /home/docker/sonarr:/config \
   -v /home/media/tvshows:/tv \
   -v /home/downloads:/downloads \
   --restart unless-stopped \
@@ -137,7 +156,7 @@ docker run -d \
   --name=radarr \
   -e TZ=Europe/Amsterdam \
   -p 7878:7878 \
-  -v /docker/radarr:/config \
+  -v /home/docker/radarr:/config \
   -v /home/media/movies:/movies \
   -v /home/downloads:/downloads \
   --restart unless-stopped \
@@ -149,7 +168,7 @@ docker run -d \
   --name=bazarr \
   -e TZ=Europe/Amsterdam \
   -p 6767:6767 \
-  -v /docker/bazarr:/config \
+  -v /home/docker/bazarr:/config \
   -v /home/media/movies:/movies \
   -v /home/media/tvshows:/tv \
   --restart unless-stopped \
