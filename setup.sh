@@ -154,8 +154,6 @@ docker run -d \
   -v /home/media/tvshows:/tv \
   --restart unless-stopped \
   ghcr.io/linuxserver/bazarr &>/dev/null
-  
-
 
 # Customize container
 msg "Customizing container..."
